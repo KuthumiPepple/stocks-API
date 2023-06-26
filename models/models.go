@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 type StocksDB struct {
@@ -26,4 +27,15 @@ func (db *StocksDB) GetStock(id int64) (Stock, error) {
 		return stock, nil
 	}
 	return stock, err
+}
+
+func (db *StocksDB) InsertStock(stock Stock) int64 {
+	sqlQuery := `INSERT INTO stocks(symbol, price, company) VALUES($1, $2, $3) RETURNING stockid`
+	var id int64
+	err := db.QueryRow(sqlQuery, stock.Symbol, stock.Price, stock.Company).Scan(&id)
+	if err != nil {
+		log.Fatalf("unable to execute the query. %v", err)
+	}
+	fmt.Printf("inserted a record: %v\n", id)
+	return id
 }
