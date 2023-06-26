@@ -61,3 +61,11 @@ func CreateStock(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(res)
 }
+
+func GetAllStocks(w http.ResponseWriter, r *http.Request) {
+	db := config.GetDB()
+	stocks := db.GetAllStocks()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(stocks)
+}

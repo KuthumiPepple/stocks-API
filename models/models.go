@@ -39,3 +39,21 @@ func (db *StocksDB) InsertStock(stock Stock) int64 {
 	fmt.Printf("inserted a record: %v\n", id)
 	return id
 }
+
+func (db *StocksDB) GetAllStocks() []Stock {
+	var stocks []Stock
+	sqlQuery := `SELECT * FROM stocks`
+	rows, err := db.Query(sqlQuery)
+	if err != nil {
+		log.Printf("Unable to execute the query. %v", err)
+	}
+	for rows.Next(){
+		var stock Stock
+		err = rows.Scan(&stock.StockID, &stock.Symbol, &stock.Price, &stock.Company)
+		if err != nil {
+			log.Fatalf("unable to scan the row. %v", err)
+		}
+		stocks = append(stocks, stock)
+	}
+	return stocks
+}
