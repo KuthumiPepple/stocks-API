@@ -11,6 +11,7 @@ func Router() *mux.Router {
 	router.HandleFunc("/api/stocks/{id}", middleware.GetStock).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/stocks", middleware.CreateStock).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/stocks", middleware.GetAllStocks).Methods("GET")
+	router.HandleFunc("/api/stocks/{id}", middleware.UpdateStock).Methods("PUT")
 
 	return router
 }

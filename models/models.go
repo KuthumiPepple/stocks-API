@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 )
 
 type StocksDB struct {
@@ -47,7 +48,7 @@ func (db *StocksDB) GetAllStocks() []Stock {
 	if err != nil {
 		log.Printf("Unable to execute the query. %v", err)
 	}
-	for rows.Next(){
+	for rows.Next() {
 		var stock Stock
 		err = rows.Scan(&stock.StockID, &stock.Symbol, &stock.Price, &stock.Company)
 		if err != nil {
@@ -56,4 +57,51 @@ func (db *StocksDB) GetAllStocks() []Stock {
 		stocks = append(stocks, stock)
 	}
 	return stocks
+}
+
+func (db *StocksDB) UpdateStock(id int64, stockUpdate Stock) int64 {
+	originalStock, err := db.GetStock(id)
+	if err != nil {
+		log.Fatalf("unable to get stock. %v", err)
+	}
+
+	sqlQuery, params := generateUpdateQuery(id, originalStock, stockUpdate)
+
+	res, err := db.Exec(sqlQuery, params...)
+	if err != nil {
+		log.Fatalf("unable to execute the query. %v", err)
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log.Fatalf("error while checking the affected rows. %v", err)
+	}
+	fmt.Println("number of rows affected:", rowsAffected)
+	return rowsAffected
+}
+
+func generateUpdateQuery(id int64, originalStock, stockUpdate Stock) (string, []any) {
+	var sb strings.Builder
+	sb.WriteString("UPDATE stocks SET ")
+	var params []any
+	if stockUpdate.Symbol != "" {
+		sb.WriteString(fmt.Sprintf("symbol=$%d,", len(params)+1))
+		params = append(params, stockUpdate.Symbol)
+	}
+	if stockUpdate.Price != 0 {
+		sb.WriteString(fmt.Sprintf("price=$%d,", len(params)+1))
+		params = append(params, stockUpdate.Price)
+	}
+	if stockUpdate.Company != "" {
+		sb.WriteString(fmt.Sprintf("company=$%d,", len(params)+1))
+		params = append(params, stockUpdate.Company)
+	}
+
+	updateQuery := strings.TrimSuffix(sb.String(), ",")
+	sb.Reset()
+	sb.WriteString(updateQuery)
+	sb.WriteString(fmt.Sprintf(" WHERE stockid=$%d", len(params)+1))
+	params = append(params, id)
+	updateQuery = sb.String()
+
+	return updateQuery, params
 }

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -68,4 +69,28 @@ func GetAllStocks(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(stocks)
+}
+
+func UpdateStock(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.ParseInt(params["id"], 10, 0)
+	if err != nil {
+		log.Fatalf("unable to convert from string to int. %v", err)
+	}
+
+	var stockUpdate models.Stock
+	json.NewDecoder(r.Body).Decode(&stockUpdate)
+	if err != nil {
+		log.Fatalf("unable to decode the request body. %v", err)
+	}
+
+	updatedRows := config.GetDB().UpdateStock(id, stockUpdate)
+	msg := fmt.Sprintf("stock updated successfully. Total records affected: %v", updatedRows)
+	res := response{
+		ID:      id,
+		Message: msg,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(res)
 }
