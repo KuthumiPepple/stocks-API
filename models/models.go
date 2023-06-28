@@ -79,6 +79,20 @@ func (db *StocksDB) UpdateStock(id int64, stockUpdate Stock) int64 {
 	return rowsAffected
 }
 
+func (db *StocksDB) DeleteStock(id int64) int64 {
+	sqlQuery := `DELETE FROM stocks WHERE stockid=$1`
+	res, err := db.Exec(sqlQuery, id)
+	if err != nil {
+		log.Fatalf("Unable to execute the query. %v", err)
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log.Fatalf("error while checking the affected rows. %v", err)
+	}
+	fmt.Println("number of rows affected:", rowsAffected)
+	return rowsAffected
+}
+
 func generateUpdateQuery(id int64, originalStock, stockUpdate Stock) (string, []any) {
 	var sb strings.Builder
 	sb.WriteString("UPDATE stocks SET ")

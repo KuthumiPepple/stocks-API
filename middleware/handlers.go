@@ -94,3 +94,22 @@ func UpdateStock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
 }
+
+func DeleteStock(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.ParseInt(params["id"], 10, 0)
+	if err != nil {
+		log.Fatalf("Unable to convert string to int. %v", err)
+	}
+
+	db := config.GetDB()
+	rowsDeleted := db.DeleteStock(id)
+	msg := fmt.Sprintf("Stock deleted. Total records affected: %v", rowsDeleted)
+	res := response{
+		ID:      id,
+		Message: msg,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(res)
+}
