@@ -7,7 +7,7 @@ This API provides endpoints for managing stocks
 ## Getting started
 To run this application as-is:
 1. Clone the repository and navigate to the project directory
-2. Run `go mod tidy` command to download all the dependencies.
+2. Run `go mod download` command to download all the dependencies.
 3. Create a PostgreSQL database. Create a table named `stocks`. The columns should align with the `Stock` model in the [models package](models/models.go) with the `stockid` column set as `SERIAL PRIMARY KEY`
 4. Edit the .env file to use your database details.
 5. Run `go run main.go` command to start the application
